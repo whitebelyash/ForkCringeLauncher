@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,7 @@ import androidx.appcompat.app.AlertDialog;
 import ca.dnamobile.javalauncher.controls.ControlsPreferences;
 import ca.dnamobile.javalauncher.controls.TouchControlsLayoutData;
 import ca.dnamobile.javalauncher.controls.TouchControlsStore;
+import ca.dnamobile.javalauncher.controls.TouchKeyPickerDialog;
 import ca.dnamobile.javalauncher.settings.LauncherPreferences;
 
 import java.io.File;
@@ -88,7 +90,6 @@ public final class GamepadMappingDialog {
         final boolean originalHotbarDebug = ControlsPreferences.isHotbarHitboxDebugEnabled(activity);
         final int originalHotbarGuiScaleOverride = ControlsPreferences.getHotbarGuiScaleOverride(activity);
         final int originalMouseDpiScale = store.getHardwareMouseDpiScale();
-        final int originalResolutionScale = LauncherPreferences.getGameResolutionScalePercent(activity);
         final boolean[] saved = new boolean[]{false};
 
         ScrollView scrollView = new ScrollView(activity);
@@ -127,8 +128,8 @@ public final class GamepadMappingDialog {
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
 
-        Map<GamepadButton, Spinner[]> gameSpinners = new EnumMap<>(GamepadButton.class);
-        Map<GamepadButton, Spinner[]> menuSpinners = new EnumMap<>(GamepadButton.class);
+        Map<GamepadButton, ActionSlotView[]> gameSlots = new EnumMap<>(GamepadButton.class);
+        Map<GamepadButton, ActionSlotView[]> menuSlots = new EnumMap<>(GamepadButton.class);
 
         // Controller profile card.
         LinearLayout profileCard = addCard(activity, root);
@@ -144,6 +145,36 @@ public final class GamepadMappingDialog {
         profileCard.addView(profileSpinner, matchWrapWithTopMargin(activity, 6));
         profileInfo.setVisibility(profiles.size() > 1 ? View.VISIBLE : View.GONE);
 
+        LinearLayout transferRow = new LinearLayout(activity);
+        transferRow.setOrientation(LinearLayout.HORIZONTAL);
+        transferRow.setGravity(Gravity.CENTER_VERTICAL);
+        transferRow.setPadding(0, dp(activity, 8), 0, 0);
+
+        Button exportProfile = styledSmallButton(activity, "Export selected profile");
+        Button importProfile = styledSmallButton(activity, "Import into selected profile");
+        transferRow.addView(exportProfile, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        LinearLayout.LayoutParams importParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        importParams.leftMargin = dp(activity, 8);
+        transferRow.addView(importProfile, importParams);
+        profileCard.addView(transferRow, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        addSmallHint(activity, profileCard, "Exports/imports the currently selected controller profile as a portable DroidBridge gamepad mapping JSON file.");
+
+        exportProfile.setOnClickListener(view -> {
+            String profileKey = selectedProfileKey(profiles, profileSpinner);
+            saveSection(store, profileKey, false, menuSlots);
+            saveSection(store, profileKey, true, gameSlots);
+            store.setActiveProfileKey(profileKey);
+            GamepadMappingTransferActivity.startExport(activity, profileKey);
+        });
+        importProfile.setOnClickListener(view -> {
+            String profileKey = selectedProfileKey(profiles, profileSpinner);
+            store.setActiveProfileKey(profileKey);
+            GamepadMappingTransferActivity.startImport(activity, profileKey);
+        });
+
         // Mapping cards live directly under the active controller profile so users can change
         // the attached controller's mappings before the general overlay/hotbar settings.
         LinearLayout menuMappingCard = addCard(activity, root);
@@ -152,7 +183,7 @@ public final class GamepadMappingDialog {
         addCollapsibleHeader(activity, menuMappingCard, "Menu mappings", menuMappingContent, false);
         addInfoText(activity, menuMappingContent,
                 "Used in Minecraft menus. D-pad cursor movement now only repeats when the selected D-pad action is a Cursor action.");
-        addSection(activity, menuMappingContent, false, store, selectedProfileKey(profiles, profileSpinner), menuSpinners);
+        addSection(activity, menuMappingContent, false, store, selectedProfileKey(profiles, profileSpinner), menuSlots);
         menuMappingCard.addView(menuMappingContent);
 
         LinearLayout gameMappingCard = addCard(activity, root);
@@ -161,7 +192,7 @@ public final class GamepadMappingDialog {
         addCollapsibleHeader(activity, gameMappingCard, "In-game mappings", gameMappingContent, false);
         addInfoText(activity, gameMappingContent,
                 "Used while Minecraft has grabbed the mouse or when Force in-game mappings is enabled.");
-        addSection(activity, gameMappingContent, true, store, selectedProfileKey(profiles, profileSpinner), gameSpinners);
+        addSection(activity, gameMappingContent, true, store, selectedProfileKey(profiles, profileSpinner), gameSlots);
         gameMappingCard.addView(gameMappingContent);
 
         // General overlay card.
@@ -304,8 +335,8 @@ public final class GamepadMappingDialog {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String profileKey = selectedProfileKey(profiles, profileSpinner);
                 store.setActiveProfileKey(profileKey);
-                applySectionSelections(store, profileKey, false, menuSpinners);
-                applySectionSelections(store, profileKey, true, gameSpinners);
+                applySectionSelections(store, profileKey, false, menuSlots);
+                applySectionSelections(store, profileKey, true, gameSlots);
             }
 
             @Override
@@ -344,8 +375,8 @@ public final class GamepadMappingDialog {
                     ControlsPreferences.setHotbarXOffsetDp(activity, progressToFloat(hotbarXOffset.getProgress(), -160));
                     ControlsPreferences.setHotbarYOffsetDp(activity, progressToFloat(hotbarYOffset.getProgress(), -80));
                     ControlsPreferences.setHotbarVerticalPaddingDp(activity, progressToFloat(hotbarPadding.getProgress(), 0));
-                    saveSection(store, profileKey, true, gameSpinners);
-                    saveSection(store, profileKey, false, menuSpinners);
+                    saveSection(store, profileKey, true, gameSlots);
+                    saveSection(store, profileKey, false, menuSlots);
                     notifySettingsChanged(activity, listener);
                 })
                 .setNeutralButton("Reset defaults", (dialogInterface, which) -> {
@@ -366,7 +397,10 @@ public final class GamepadMappingDialog {
                 ControlsPreferences.setHotbarHitboxDebugEnabled(activity, originalHotbarDebug);
                 ControlsPreferences.setHotbarGuiScaleOverride(activity, originalHotbarGuiScaleOverride);
                 store.setHardwareMouseDpiScale(originalMouseDpiScale);
-                LauncherPreferences.setGameResolutionScalePercent(activity, originalResolutionScale);
+                // Resolution scale is applied live so the running game can resize
+                // immediately. Do not roll it back on Cancel/dismiss, otherwise the
+                // overlay appears to save 100% but the next launch returns to the old
+                // main-settings value.
                 notifySettingsChanged(activity, listener);
             }
             activeDialog = null;
@@ -547,6 +581,20 @@ public final class GamepadMappingDialog {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
+    }
+
+    @NonNull
+    private static Button styledSmallButton(@NonNull Activity activity, @NonNull String label) {
+        Button button = new Button(activity);
+        button.setText(label);
+        button.setAllCaps(false);
+        button.setTextSize(13);
+        button.setTextColor(COLOR_ACCENT);
+        button.setMinHeight(0);
+        button.setMinimumHeight(0);
+        button.setPadding(dp(activity, 10), dp(activity, 6), dp(activity, 10), dp(activity, 6));
+        button.setBackground(roundedDrawable(activity, COLOR_CARD_BG, COLOR_ACCENT_MUTED, 14));
+        return button;
     }
 
     @NonNull
@@ -1007,9 +1055,8 @@ public final class GamepadMappingDialog {
             boolean gameMode,
             @NonNull GamepadMappingStore store,
             @NonNull String profileKey,
-            @NonNull Map<GamepadButton, Spinner[]> out
+            @NonNull Map<GamepadButton, ActionSlotView[]> out
     ) {
-        ArrayAdapter<GamepadAction> actionAdapter = darkAdapter(activity, Arrays.asList(GamepadAction.values()));
         ArrayList<String> extraSlotLabels = new ArrayList<>();
         extraSlotLabels.add("Extra mappings hidden");
         for (int slot = 1; slot < GamepadMappingStore.MAX_ACTION_SLOTS; slot++) {
@@ -1021,7 +1068,7 @@ public final class GamepadMappingDialog {
             group.setOrientation(LinearLayout.VERTICAL);
             group.setPadding(0, dp(activity, 6), 0, dp(activity, 8));
 
-            Spinner[] slots = new Spinner[GamepadMappingStore.MAX_ACTION_SLOTS];
+            ActionSlotView[] slots = new ActionSlotView[GamepadMappingStore.MAX_ACTION_SLOTS];
 
             LinearLayout primaryRow = new LinearLayout(activity);
             primaryRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -1052,13 +1099,17 @@ public final class GamepadMappingDialog {
                     ViewGroup.LayoutParams.WRAP_CONTENT
             ));
 
-            Spinner primarySpinner = new Spinner(activity);
-            primarySpinner.setAdapter(actionAdapter);
-            primarySpinner.setSelection(store.getButtonActionSlot(button, gameMode, profileKey, 0).ordinal());
-            slots[0] = primarySpinner;
+            ActionSlotView primarySlot = createActionSlotView(
+                    activity,
+                    button,
+                    gameMode,
+                    0,
+                    store.getButtonActionSlot(button, gameMode, profileKey, 0)
+            );
+            slots[0] = primarySlot;
 
             primaryRow.addView(buttonColumn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 0.9f));
-            primaryRow.addView(primarySpinner, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.55f));
+            primaryRow.addView(primarySlot.view, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.55f));
             group.addView(primaryRow, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -1100,19 +1151,23 @@ public final class GamepadMappingDialog {
                     slotLabel.setTextSize(12);
                     slotLabel.setTextColor(COLOR_TEXT_MUTED);
 
-                    Spinner spinner = new Spinner(activity);
-                    spinner.setAdapter(actionAdapter);
-                    spinner.setSelection(store.getButtonActionSlot(button, gameMode, profileKey, slot).ordinal());
+                    ActionSlotView slotView = createActionSlotView(
+                            activity,
+                            button,
+                            gameMode,
+                            slot,
+                            store.getButtonActionSlot(button, gameMode, profileKey, slot)
+                    );
 
                     row.addView(slotLabel, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 0.75f));
-                    row.addView(spinner, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.6f));
+                    row.addView(slotView.view, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.6f));
                     group.addView(row, new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                     ));
 
                     extraRows.add(row);
-                    slots[slot] = spinner;
+                    slots[slot] = slotView;
                 }
 
                 extraSlotSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1141,17 +1196,98 @@ public final class GamepadMappingDialog {
         }
     }
 
+    @NonNull
+    private static ActionSlotView createActionSlotView(
+            @NonNull Activity activity,
+            @NonNull GamepadButton button,
+            boolean gameMode,
+            int slot,
+            @NonNull GamepadAction initialAction
+    ) {
+        TextView view = new TextView(activity);
+        view.setTextSize(14);
+        view.setTypeface(Typeface.DEFAULT_BOLD);
+        view.setTextColor(COLOR_TEXT_PRIMARY);
+        view.setGravity(Gravity.CENTER_VERTICAL);
+        view.setMinHeight(dp(activity, 44));
+        view.setPadding(dp(activity, 12), dp(activity, 8), dp(activity, 12), dp(activity, 8));
+        view.setSingleLine(false);
+        view.setClickable(true);
+        view.setFocusable(true);
+        ActionSlotView slotView = new ActionSlotView(view, initialAction);
+        view.setOnClickListener(v -> showActionKeyboardDialog(
+                activity,
+                button + " • Position " + slot,
+                gameMode,
+                slotView.action,
+                slotView::setAction
+        ));
+        return slotView;
+    }
+
+    private interface ActionPickCallback {
+        void onActionPicked(@NonNull GamepadAction action);
+    }
+
+    private static void showActionKeyboardDialog(
+            @NonNull Activity activity,
+            @NonNull String title,
+            boolean gameMode,
+            @NonNull GamepadAction currentAction,
+            @NonNull ActionPickCallback callback
+    ) {
+        ArrayList<TouchKeyPickerDialog.KeySpec> gamepadExtras = new ArrayList<>();
+        gamepadExtras.add(TouchKeyPickerDialog.extraKey("Cursor Up", TouchKeyPickerDialog.GAMEPAD_CURSOR_UP, 1.20f));
+        gamepadExtras.add(TouchKeyPickerDialog.extraKey("Cursor Down", TouchKeyPickerDialog.GAMEPAD_CURSOR_DOWN, 1.30f));
+        gamepadExtras.add(TouchKeyPickerDialog.extraKey("Cursor Left", TouchKeyPickerDialog.GAMEPAD_CURSOR_LEFT, 1.30f));
+        gamepadExtras.add(TouchKeyPickerDialog.extraKey("Cursor Right", TouchKeyPickerDialog.GAMEPAD_CURSOR_RIGHT, 1.35f));
+
+        TouchKeyPickerDialog.showPicker(
+                activity,
+                "Pick key for " + title,
+                (gameMode
+                        ? "Tap a key for in-game mode. Mouse actions are below. Current: "
+                        : "Tap a key for menu mode. Mouse/cursor actions are below. Current: ") + currentAction,
+                gamepadExtras,
+                keyCode -> {
+                    GamepadAction action = gamepadActionForPickerCode(keyCode);
+                    if (action == null) {
+                        Toast.makeText(activity, "That touch-only action is not available for gamepad mappings.", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    callback.onActionPicked(action);
+                    return true;
+                }
+        );
+    }
+
+    @Nullable
+    private static GamepadAction gamepadActionForPickerCode(int keyCode) {
+        switch (keyCode) {
+            case TouchKeyPickerDialog.GAMEPAD_CURSOR_UP:
+                return GamepadAction.CURSOR_UP;
+            case TouchKeyPickerDialog.GAMEPAD_CURSOR_DOWN:
+                return GamepadAction.CURSOR_DOWN;
+            case TouchKeyPickerDialog.GAMEPAD_CURSOR_LEFT:
+                return GamepadAction.CURSOR_LEFT;
+            case TouchKeyPickerDialog.GAMEPAD_CURSOR_RIGHT:
+                return GamepadAction.CURSOR_RIGHT;
+            default:
+                return GamepadAction.fromKeyboardPickerCode(keyCode);
+        }
+    }
+
     private static void applySectionSelections(
             @NonNull GamepadMappingStore store,
             @NonNull String profileKey,
             boolean gameMode,
-            @NonNull Map<GamepadButton, Spinner[]> spinners
+            @NonNull Map<GamepadButton, ActionSlotView[]> slotsByButton
     ) {
-        for (Map.Entry<GamepadButton, Spinner[]> entry : spinners.entrySet()) {
-            Spinner[] slots = entry.getValue();
+        for (Map.Entry<GamepadButton, ActionSlotView[]> entry : slotsByButton.entrySet()) {
+            ActionSlotView[] slots = entry.getValue();
             for (int slot = 0; slot < slots.length; slot++) {
                 if (slots[slot] != null) {
-                    slots[slot].setSelection(store.getButtonActionSlot(entry.getKey(), gameMode, profileKey, slot).ordinal());
+                    slots[slot].setAction(store.getButtonActionSlot(entry.getKey(), gameMode, profileKey, slot));
                 }
             }
         }
@@ -1161,18 +1297,39 @@ public final class GamepadMappingDialog {
             @NonNull GamepadMappingStore store,
             @NonNull String profileKey,
             boolean gameMode,
-            @NonNull Map<GamepadButton, Spinner[]> spinners
+            @NonNull Map<GamepadButton, ActionSlotView[]> slotsByButton
     ) {
-        for (Map.Entry<GamepadButton, Spinner[]> entry : spinners.entrySet()) {
-            Spinner[] slots = entry.getValue();
+        for (Map.Entry<GamepadButton, ActionSlotView[]> entry : slotsByButton.entrySet()) {
+            ActionSlotView[] slots = entry.getValue();
             for (int slot = 0; slot < slots.length; slot++) {
-                Spinner spinner = slots[slot];
-                if (spinner == null) continue;
-                Object selected = spinner.getSelectedItem();
-                if (selected instanceof GamepadAction) {
-                    store.setButtonActionSlot(entry.getKey(), (GamepadAction) selected, gameMode, profileKey, slot);
-                }
+                ActionSlotView slotView = slots[slot];
+                if (slotView == null) continue;
+                store.setButtonActionSlot(entry.getKey(), slotView.action, gameMode, profileKey, slot);
             }
+        }
+    }
+
+    private static final class ActionSlotView {
+        @NonNull final TextView view;
+        @NonNull GamepadAction action;
+
+        ActionSlotView(@NonNull TextView view, @NonNull GamepadAction action) {
+            this.view = view;
+            this.action = action;
+            setAction(action);
+        }
+
+        void setAction(@NonNull GamepadAction action) {
+            this.action = action;
+            view.setText(action.toString());
+            boolean empty = action == GamepadAction.NONE;
+            view.setTextColor(empty ? COLOR_TEXT_MUTED : COLOR_TEXT_PRIMARY);
+            view.setBackground(roundedDrawable(
+                    (Activity) view.getContext(),
+                    empty ? COLOR_CARD_BG : COLOR_CARD_BG_PRESSED,
+                    empty ? COLOR_CARD_STROKE : COLOR_ACCENT_MUTED,
+                    12
+            ));
         }
     }
 

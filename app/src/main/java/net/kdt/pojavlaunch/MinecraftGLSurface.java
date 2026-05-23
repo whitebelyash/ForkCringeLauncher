@@ -281,6 +281,23 @@ public class MinecraftGLSurface extends FrameLayout implements GrabListener {
     }
 
     public void refreshSize() {
+        refreshSize(false, "refreshSize");
+    }
+
+    /**
+     * Re-sends the current size even when the dimensions have not changed.
+     *
+     * Some renderer/loader combinations create the real GLFW window after the
+     * first launcher-side screen-size event. If we suppress later identical
+     * events, Minecraft can keep drawing into the smaller startup viewport until
+     * the user changes the resolution slider manually. A forced startup resend
+     * mimics that manual refresh without requiring the user to touch the setting.
+     */
+    private void forceRefreshSize(@NonNull String reason) {
+        refreshSize(true, reason);
+    }
+
+    private void refreshSize(boolean forceSendWindowSize, @NonNull String reason) {
         int width = safeWidth(getWidth());
         int height = safeHeight(getHeight());
 
@@ -288,10 +305,14 @@ public class MinecraftGLSurface extends FrameLayout implements GrabListener {
         if (height <= 1 && renderView != null) height = safeHeight(renderView.getHeight());
 
         RenderSize size = updateScaledSizeFromView(width, height);
-        refreshSize(size);
+        refreshSize(size, forceSendWindowSize, reason);
     }
 
     private void refreshSize(@NonNull RenderSize size) {
+        refreshSize(size, false, "refreshSize");
+    }
+
+    private void refreshSize(@NonNull RenderSize size, boolean forceSendWindowSize, @NonNull String reason) {
         updateSizeFields(size);
 
         if (textureView != null && textureView.getSurfaceTexture() != null) {
@@ -303,7 +324,10 @@ public class MinecraftGLSurface extends FrameLayout implements GrabListener {
         }
 
         if (bridgeWindowAttached) {
-            sendWindowSizeIfChanged(size, "refreshSize");
+            if (forceSendWindowSize) {
+                resetSentWindowSize();
+            }
+            sendWindowSizeIfChanged(size, reason);
         }
     }
 
@@ -468,11 +492,22 @@ public class MinecraftGLSurface extends FrameLayout implements GrabListener {
     }
 
     private void scheduleSurfaceResizeRefreshes() {
+        // Normal layout refreshes keep Android's backing surface in sync.
         post(this::refreshSize);
         postDelayed(this::refreshSize, 120L);
         postDelayed(this::refreshSize, 350L);
-        postDelayed(this::refreshSize, 750L);
-        postDelayed(this::refreshSize, 1500L);
+
+        // Force a few duplicate GLFW size events after launch. The first
+        // attachBridgeWindow() size update can happen before newer Forge/
+        // NeoForge/MobileGlues early-display paths have their final window ready.
+        // Without these, a below-100% resolution scale can leave the game drawing
+        // into the smaller startup viewport until the user changes the slider.
+        postDelayed(() -> forceRefreshSize("startup-resync-750"), 750L);
+        postDelayed(() -> forceRefreshSize("startup-resync-1500"), 1500L);
+        postDelayed(() -> forceRefreshSize("startup-resync-3000"), 3000L);
+        postDelayed(() -> forceRefreshSize("startup-resync-6000"), 6000L);
+        postDelayed(() -> forceRefreshSize("startup-resync-10000"), 10000L);
+        postDelayed(() -> forceRefreshSize("startup-resync-14000"), 14000L);
     }
 
     private void notifyRenderingStartedOnce() {

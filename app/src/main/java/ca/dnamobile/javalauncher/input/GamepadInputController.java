@@ -50,9 +50,12 @@ public final class GamepadInputController {
 
     // When Minecraft closes a GUI/inventory and re-grabs the pointer, Android can
     // still report the stick value that was being used to move the menu cursor.
-    // Block camera movement briefly and require the right stick to return neutral
-    // so the old menu-cursor value cannot become a sudden camera snap.
-    private static final long GAME_REGRAB_CAMERA_SUPPRESS_NANOS = 650_000_000L;
+    // If the right stick was already neutral, only swallow a tiny settle window so
+    // the first real camera movement after leaving the menu is not lost. If the
+    // stick was active, keep the stale-input guard but time it out so the camera
+    // cannot stay stuck until the user moves the stick a second time.
+    private static final long GAME_REGRAB_CAMERA_SETTLE_NANOS = 120_000_000L;
+    private static final long GAME_REGRAB_STALE_STICK_TIMEOUT_NANOS = 650_000_000L;
 
     private static final int DIRECTION_NONE = -1;
     private static final int DIRECTION_EAST = 0;
@@ -293,19 +296,37 @@ public final class GamepadInputController {
     }
 
     private void blockCameraAfterMenuClose(long nowNanos, @NonNull String reason) {
-        clearStickAxes();
+        boolean rightStickWasActive = !isRightStickNeutral();
+
+        clearLeftStickAxes();
+        if (!rightStickWasActive) {
+            clearRightStickAxes();
+        }
         releaseDirection();
-        requireRightStickNeutralBeforeCamera = true;
+
+        requireRightStickNeutralBeforeCamera = rightStickWasActive;
         suppressCameraUntilNanos = Math.max(
                 suppressCameraUntilNanos,
-                nowNanos + GAME_REGRAB_CAMERA_SUPPRESS_NANOS
+                nowNanos + (rightStickWasActive
+                        ? GAME_REGRAB_STALE_STICK_TIMEOUT_NANOS
+                        : GAME_REGRAB_CAMERA_SETTLE_NANOS)
         );
-        Logging.i(TAG, reason + "; blocking controller camera until right stick returns neutral");
+
+        Logging.i(TAG, reason + (rightStickWasActive
+                ? "; right stick was active, guarding camera until neutral or timeout"
+                : "; right stick was neutral, short camera settle only"));
     }
 
-    private void clearStickAxes() {
+    private boolean isRightStickNeutral() {
+        return rightX == 0f && rightY == 0f;
+    }
+
+    private void clearLeftStickAxes() {
         leftX = 0f;
         leftY = 0f;
+    }
+
+    private void clearRightStickAxes() {
         rightX = 0f;
         rightY = 0f;
     }
@@ -333,13 +354,25 @@ public final class GamepadInputController {
     }
 
     private boolean shouldBlockCameraInput(long frameTimeNanos) {
-        boolean rightStickNeutral = rightX == 0f && rightY == 0f;
+        boolean rightStickNeutral = isRightStickNeutral();
+        boolean timedSuppressActive = frameTimeNanos < suppressCameraUntilNanos;
 
-        if (rightStickNeutral && frameTimeNanos >= suppressCameraUntilNanos) {
+        if (requireRightStickNeutralBeforeCamera && (rightStickNeutral || !timedSuppressActive)) {
+            // Clear the latch as soon as the stale stick returns neutral. Also clear
+            // it after the stale timeout so a noisy controller cannot leave camera
+            // input stuck until the user moves the right stick a second time.
             requireRightStickNeutralBeforeCamera = false;
+
+            if (rightStickNeutral && timedSuppressActive) {
+                suppressCameraUntilNanos = Math.min(
+                        suppressCameraUntilNanos,
+                        frameTimeNanos + GAME_REGRAB_CAMERA_SETTLE_NANOS
+                );
+                timedSuppressActive = frameTimeNanos < suppressCameraUntilNanos;
+            }
         }
 
-        return frameTimeNanos < suppressCameraUntilNanos || requireRightStickNeutralBeforeCamera;
+        return timedSuppressActive || requireRightStickNeutralBeforeCamera;
     }
 
     private void tickMenuCursor(float deltaScale) {

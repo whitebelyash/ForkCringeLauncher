@@ -106,13 +106,16 @@ public class UnpackComponentsTask extends AbstractUnpackTask {
     private static String resolveRootDir(@NonNull Components component) {
         switch (component) {
             case COMPONENTS:
+            case WEBRTC_BRIDGE:
                 return PathManager.DIR_DATA;
+
             case LWJGL3:
             case LWJGL341:
             case OTHER_LOGIN:
             case CACIOCAVALLO:
             case CACIOCAVALLO17:
                 return PathManager.DIR_FILE.getAbsolutePath();
+
             default:
                 return component.privateDirectory
                         ? PathManager.DIR_FILE.getAbsolutePath()

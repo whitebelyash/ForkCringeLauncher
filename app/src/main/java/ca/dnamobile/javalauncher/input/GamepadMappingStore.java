@@ -19,23 +19,14 @@ import android.view.InputDevice;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
-/**
- * Persistent controller mapping store.
- *
- * Mappings are now stored per physical controller profile when Android gives us
- * a stable InputDevice. The old global keys are still read as a fallback so
- * existing saved mappings are not lost.
- *
- * Important:
- * Older JavaLauncher controller patches defaulted menu A/R2/DPAD_CENTER to ENTER.
- * That old saved value can survive rebuilds and make the cursor move while A does not
- * left-click Minecraft buttons. This class migrates those old saved values back to
- * Mouse Left Click once.
- */
 public final class GamepadMappingStore {
     private static final String PREFS_NAME = "gamepad_mapping";
     private static final String GAME_PREFIX = "game.";
@@ -54,7 +45,7 @@ public final class GamepadMappingStore {
     private static final String GAME_CAMERA_SENSITIVITY = "game_camera_sensitivity";
     private static final String HARDWARE_MOUSE_DPI_SCALE = "hardware_mouse_dpi_scale";
 
-    private static final int CURRENT_PREF_VERSION = 9;
+    private static final int CURRENT_PREF_VERSION = 10;
     private static final int DEFAULT_SENSITIVITY = 100;
     private static final int DEFAULT_MOUSE_DPI_SCALE = 100;
     public static final int MIN_SENSITIVITY = 25;
@@ -108,10 +99,12 @@ public final class GamepadMappingStore {
         // they fall back to the safer Arrow key defaults below. Users can still map
         // any D-pad direction back to Cursor Up/Down/Left/Right manually.
         removeLegacyMenuDpadCursorMapping(editor, DEFAULT_PROFILE);
+        removeOldRequestedDefaultMappings(editor, DEFAULT_PROFILE);
         Set<String> knownProfiles = prefs.getStringSet(KNOWN_PROFILES, Collections.emptySet());
         if (knownProfiles != null) {
             for (String profileKey : knownProfiles) {
                 removeLegacyMenuDpadCursorMapping(editor, profileKey);
+                removeOldRequestedDefaultMappings(editor, profileKey);
             }
         }
 
@@ -316,7 +309,7 @@ public final class GamepadMappingStore {
             if (action != null) return action;
         }
 
-        return GamepadAction.NONE;
+        return defaultActionSlot(button, gameMode, safeSlot);
     }
 
     @NonNull
@@ -402,6 +395,172 @@ public final class GamepadMappingStore {
                 .apply();
     }
 
+    @NonNull
+    public JSONObject exportProfileToJson(@Nullable String profileKey) throws Exception {
+        String safeProfile = isValidProfileKey(profileKey) ? profileKey : getActiveProfileKey();
+
+        JSONObject root = new JSONObject();
+        root.put("format", "droidbridge.gamepad.profile");
+        root.put("version", 1);
+        root.put("profileKey", safeProfile);
+        root.put("profileName", getProfileDisplayName(safeProfile));
+
+        JSONObject settings = new JSONObject();
+        settings.put("showCursorOverlay", isShowCursorOverlay());
+        settings.put("menuCursorSensitivity", getMenuCursorSensitivity());
+        settings.put("gameCameraSensitivity", getGameCameraSensitivity());
+        settings.put("hardwareMouseDpiScale", getHardwareMouseDpiScale());
+        root.put("settings", settings);
+
+        root.put("menu", exportModeToJson(safeProfile, false));
+        root.put("game", exportModeToJson(safeProfile, true));
+        return root;
+    }
+
+    public void importProfileFromJson(@NonNull JSONObject root, @Nullable String profileKey) throws Exception {
+        String safeProfile = isValidProfileKey(profileKey) ? profileKey : getActiveProfileKey();
+        String profileName = root.optString("profileName", null);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        rememberImportedProfile(editor, safeProfile, profileName);
+        importModeFromJson(editor, root.optJSONObject("menu"), safeProfile, false);
+        importModeFromJson(editor, root.optJSONObject("game"), safeProfile, true);
+
+        JSONObject settings = root.optJSONObject("settings");
+        if (settings != null) {
+            if (settings.has("showCursorOverlay")) {
+                editor.putBoolean(SHOW_CURSOR_OVERLAY, settings.optBoolean("showCursorOverlay", true));
+            }
+            if (settings.has("menuCursorSensitivity")) {
+                editor.putInt(MENU_CURSOR_SENSITIVITY, clampSensitivity(settings.optInt("menuCursorSensitivity", DEFAULT_SENSITIVITY)));
+            }
+            if (settings.has("gameCameraSensitivity")) {
+                editor.putInt(GAME_CAMERA_SENSITIVITY, clampSensitivity(settings.optInt("gameCameraSensitivity", DEFAULT_SENSITIVITY)));
+            }
+            if (settings.has("hardwareMouseDpiScale")) {
+                editor.putInt(HARDWARE_MOUSE_DPI_SCALE, clampMouseDpiScale(settings.optInt("hardwareMouseDpiScale", DEFAULT_MOUSE_DPI_SCALE)));
+            }
+        }
+
+        editor.apply();
+    }
+
+    @NonNull
+    private JSONObject exportModeToJson(@NonNull String profileKey, boolean gameMode) throws Exception {
+        JSONObject mode = new JSONObject();
+        for (GamepadButton button : GamepadButton.values()) {
+            JSONArray slots = new JSONArray();
+            for (int slot = 0; slot < MAX_ACTION_SLOTS; slot++) {
+                slots.put(getButtonActionSlot(button, gameMode, profileKey, slot).name());
+            }
+            mode.put(button.name(), slots);
+        }
+        return mode;
+    }
+
+    private void importModeFromJson(
+            @NonNull SharedPreferences.Editor editor,
+            @Nullable JSONObject mode,
+            @NonNull String profileKey,
+            boolean gameMode
+    ) throws Exception {
+        if (mode == null) return;
+
+        for (GamepadButton button : GamepadButton.values()) {
+            if (!mode.has(button.name())) continue;
+            Object value = mode.opt(button.name());
+            importButtonActionsFromJson(editor, value, profileKey, button, gameMode);
+        }
+    }
+
+    private void importButtonActionsFromJson(
+            @NonNull SharedPreferences.Editor editor,
+            @Nullable Object value,
+            @NonNull String profileKey,
+            @NonNull GamepadButton button,
+            boolean gameMode
+    ) throws Exception {
+        if (value == null || value == JSONObject.NULL) return;
+
+        if (value instanceof JSONArray) {
+            JSONArray slots = (JSONArray) value;
+            for (int slot = 0; slot < MAX_ACTION_SLOTS; slot++) {
+                GamepadAction action = slot < slots.length()
+                        ? parseImportedAction(slots.opt(slot))
+                        : GamepadAction.NONE;
+                if (action != null) putButtonActionSlot(editor, profileKey, button, gameMode, slot, action);
+            }
+            return;
+        }
+
+        if (value instanceof JSONObject) {
+            JSONObject object = (JSONObject) value;
+            JSONArray slots = object.optJSONArray("slots");
+            if (slots != null) {
+                importButtonActionsFromJson(editor, slots, profileKey, button, gameMode);
+                return;
+            }
+
+            for (int slot = 0; slot < MAX_ACTION_SLOTS; slot++) {
+                String key = slot == 0 ? "primary" : "slot" + slot;
+                if (!object.has(key)) continue;
+                GamepadAction action = parseImportedAction(object.opt(key));
+                if (action != null) putButtonActionSlot(editor, profileKey, button, gameMode, slot, action);
+            }
+            return;
+        }
+
+        GamepadAction action = parseImportedAction(value);
+        if (action != null) putButtonActionSlot(editor, profileKey, button, gameMode, 0, action);
+    }
+
+    @Nullable
+    private static GamepadAction parseImportedAction(@Nullable Object rawValue) {
+        if (rawValue == null || rawValue == JSONObject.NULL) return null;
+
+        String raw = String.valueOf(rawValue).trim();
+        if (raw.isEmpty()) return null;
+
+        try {
+            return GamepadAction.valueOf(raw.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
+    private void putButtonActionSlot(
+            @NonNull SharedPreferences.Editor editor,
+            @NonNull String profileKey,
+            @NonNull GamepadButton button,
+            boolean gameMode,
+            int slot,
+            @NonNull GamepadAction action
+    ) {
+        int safeSlot = clampActionSlot(slot);
+        String key = safeSlot == 0
+                ? keyFor(profileKey, button, gameMode)
+                : keyForSlot(profileKey, button, gameMode, safeSlot);
+        editor.putString(key, action.name());
+    }
+
+    private void rememberImportedProfile(
+            @NonNull SharedPreferences.Editor editor,
+            @NonNull String profileKey,
+            @Nullable String profileName
+    ) {
+        if (DEFAULT_PROFILE.equals(profileKey)) return;
+
+        Set<String> stored = prefs.getStringSet(KNOWN_PROFILES, Collections.emptySet());
+        LinkedHashSet<String> known = new LinkedHashSet<>();
+        if (stored != null) known.addAll(stored);
+        known.add(profileKey);
+        editor.putStringSet(KNOWN_PROFILES, known);
+
+        if (profileName != null && !profileName.trim().isEmpty()) {
+            editor.putString(PROFILE_NAME_PREFIX + profileKey, profileName.trim());
+        }
+    }
+
     private void removeLegacyMenuDpadCursorMapping(
             @NonNull SharedPreferences.Editor editor,
             @Nullable String profileKey
@@ -410,6 +569,24 @@ public final class GamepadMappingStore {
         removeIfStoredAction(editor, keyForSafeProfile(profileKey, GamepadButton.DPAD_DOWN, false), GamepadAction.CURSOR_DOWN);
         removeIfStoredAction(editor, keyForSafeProfile(profileKey, GamepadButton.DPAD_LEFT, false), GamepadAction.CURSOR_LEFT);
         removeIfStoredAction(editor, keyForSafeProfile(profileKey, GamepadButton.DPAD_RIGHT, false), GamepadAction.CURSOR_RIGHT);
+    }
+
+    private void removeOldRequestedDefaultMappings(
+            @NonNull SharedPreferences.Editor editor,
+            @Nullable String profileKey
+    ) {
+        String safeProfile = isValidProfileKey(profileKey) ? profileKey : DEFAULT_PROFILE;
+
+        // These values were the old built-in defaults. Remove only those old
+        // values so the new defaults below take effect, while custom user edits
+        // to the same buttons survive the migration.
+        removeIfStoredAction(editor, keyFor(safeProfile, GamepadButton.BUTTON_Y, false), GamepadAction.NONE);
+        removeIfStoredAction(editor, keyForSlot(safeProfile, GamepadButton.BUTTON_Y, false, 1), GamepadAction.NONE);
+        removeIfStoredAction(editor, keyFor(safeProfile, GamepadButton.BUTTON_THUMBL, false), GamepadAction.NONE);
+
+        removeIfStoredAction(editor, keyFor(safeProfile, GamepadButton.DPAD_UP, true), GamepadAction.SNEAK);
+        removeIfStoredAction(editor, keyFor(safeProfile, GamepadButton.DPAD_DOWN, true), GamepadAction.KEY_O);
+        removeIfStoredAction(editor, keyFor(safeProfile, GamepadButton.DPAD_RIGHT, true), GamepadAction.KEY_K);
     }
 
     private void removeIfStoredAction(
@@ -533,13 +710,13 @@ public final class GamepadMappingStore {
                 return GamepadAction.TAB;
 
             case DPAD_UP:
-                return GamepadAction.SNEAK;
+                return GamepadAction.F5;
             case DPAD_DOWN:
-                return GamepadAction.KEY_O;
+                return GamepadAction.F3;
             case DPAD_LEFT:
                 return GamepadAction.KEY_J;
             case DPAD_RIGHT:
-                return GamepadAction.KEY_K;
+                return GamepadAction.KEY_T;
             case DPAD_CENTER:
                 return GamepadAction.NONE;
 
@@ -559,6 +736,10 @@ public final class GamepadMappingStore {
             case BUTTON_X:
             case BUTTON_L2:
                 return GamepadAction.MOUSE_RIGHT;
+
+            case BUTTON_Y:
+            case BUTTON_THUMBL:
+                return GamepadAction.LEFT_SHIFT;
 
             case BUTTON_B:
             case BUTTON_START:
@@ -582,5 +763,22 @@ public final class GamepadMappingStore {
             default:
                 return GamepadAction.NONE;
         }
+    }
+
+    @NonNull
+    private static GamepadAction defaultActionSlot(
+            @NonNull GamepadButton button,
+            boolean gameMode,
+            int slot
+    ) {
+        if (slot <= 0) {
+            return gameMode ? defaultGameAction(button) : defaultMenuAction(button);
+        }
+
+        if (!gameMode && button == GamepadButton.BUTTON_Y && slot == 1) {
+            return GamepadAction.MOUSE_LEFT;
+        }
+
+        return GamepadAction.NONE;
     }
 }

@@ -12,6 +12,9 @@
 
 package ca.dnamobile.javalauncher.input;
 
+import androidx.annotation.Nullable;
+
+import ca.dnamobile.javalauncher.controls.TouchControlData;
 import net.kdt.pojavlaunch.LwjglGlfwKeycode;
 
 import org.lwjgl.glfw.CallbackBridge;
@@ -227,6 +230,42 @@ public enum GamepadAction {
 
     private static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Maps the shared touch-control keyboard picker values to controller actions.
+     * Returns null for touch-only launcher actions that the physical gamepad bridge
+     * cannot replay as a Minecraft/gamepad action.
+     */
+    @Nullable
+    public static GamepadAction fromKeyboardPickerCode(int keyCode) {
+        switch (keyCode) {
+            case 0:
+                return NONE;
+            case TouchControlData.SPECIAL_MOUSE_LEFT:
+                return MOUSE_LEFT;
+            case TouchControlData.SPECIAL_MOUSE_RIGHT:
+                return MOUSE_RIGHT;
+            case TouchControlData.SPECIAL_MOUSE_MIDDLE:
+                return MOUSE_MIDDLE;
+            case TouchControlData.SPECIAL_SCROLL_UP:
+                return SCROLL_UP;
+            case TouchControlData.SPECIAL_SCROLL_DOWN:
+                return SCROLL_DOWN;
+            case TouchControlData.SPECIAL_KEYBOARD:
+            case TouchControlData.SPECIAL_KEY_SENDER_KEYBOARD:
+            case TouchControlData.SPECIAL_MENU:
+            case TouchControlData.SPECIAL_TOGGLE_CONTROLS:
+            case TouchControlData.SPECIAL_VIRTUAL_MOUSE:
+                return null;
+            default:
+                for (GamepadAction action : values()) {
+                    if (action.type == Type.KEY && action.code == keyCode) {
+                        return action;
+                    }
+                }
+                return null;
+        }
     }
 
     @Override

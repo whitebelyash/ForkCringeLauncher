@@ -28,7 +28,8 @@ public enum Components {
 
     // Launcher support components (MioLibPatcher.jar, Forge installer, etc.) are expected from
     // DIR_DATA/components, not from context.filesDir/components.
-    COMPONENTS("components", "Launcher Components", R.string.splash_screen_components, false);
+    COMPONENTS("components", "Launcher Components", R.string.splash_screen_components, false),
+    WEBRTC_BRIDGE("webrtc_bridge", "Android WebRTC Bridge", R.string.splash_screen_components, false);
 
     public final String component;
     public final String displayName;
