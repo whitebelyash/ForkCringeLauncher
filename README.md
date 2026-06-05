@@ -1,11 +1,11 @@
 # Before anything, LOOK AT DNAMobile's PAST
 ### (switch to desktop mode if blurry/muddy)
-## https://docs.google.com/document/d/1MpblBzFEjJZDVkVChou8sdy7MuB2V_bck6MXDAGt4a0/edit?tab=t.0  
+## [Old ES-DE drama](https://docs.google.com/document/d/1MpblBzFEjJZDVkVChou8sdy7MuB2V_bck6MXDAGt4a0/edit?tab=t.0)  
 ### some reddit posts about him scamming people for money also:  
-https://www.reddit.com/r/SBCGaming/comments/1l7i4bf/have_we_seen_the_retroid_dual_screen_actually/  
-https://www.reddit.com/r/OdinHandheld/comments/1p50n59/dna_odin_2_portal_dual_screen/  
-https://www.reddit.com/r/SteamDeck/comments/1iokv8k/to_anyone_here_whos_ordered_a_dna_duo_for_their/  
-https://www.reddit.com/r/OdinHandheld/comments/1hn0j2b/dna_duo/  
+[On r/SBCGaming](https://www.reddit.com/r/SBCGaming/comments/1l7i4bf/have_we_seen_the_retroid_dual_screen_actually/)  
+[On r/SBCGaming](https://www.reddit.com/r/OdinHandheld/comments/1p50n59/dna_odin_2_portal_dual_screen/)  
+[On r/SteamDeck](https://www.reddit.com/r/SteamDeck/comments/1iokv8k/to_anyone_here_whos_ordered_a_dna_duo_for_their/)  
+[On r/OdinHandheld](https://www.reddit.com/r/OdinHandheld/comments/1hn0j2b/dna_duo/)  
 ## ForkBridgeLauncher, an alternative without the Minecraft account requirement
 
 This fork exists because DNAMobile's actions are problematic.  
