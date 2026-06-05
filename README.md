@@ -1,150 +1,54 @@
-<p align="center">
-  <img src="docs/app_icon.png" alt="DroidBridge Launcher" width="128" height="128">
-</p>
+# Before anything, LOOK AT DNAMobile's PAST
+### (switch to desktop mode if blurry/muddy)
+## https://docs.google.com/document/d/1MpblBzFEjJZDVkVChou8sdy7MuB2V_bck6MXDAGt4a0/edit?tab=t.0  
+### some reddit posts about him scamming people for money also:  
+https://www.reddit.com/r/SBCGaming/comments/1l7i4bf/have_we_seen_the_retroid_dual_screen_actually/  
+https://www.reddit.com/r/OdinHandheld/comments/1p50n59/dna_odin_2_portal_dual_screen/  
+https://www.reddit.com/r/SteamDeck/comments/1iokv8k/to_anyone_here_whos_ordered_a_dna_duo_for_their/  
+https://www.reddit.com/r/OdinHandheld/comments/1hn0j2b/dna_duo/  
+## ForkBridgeLauncher, an alternative without the Minecraft account requirement
 
-<h1 align="center">DroidBridge Launcher</h1>
+This fork exists because DNAMobile's actions are problematic.  
+You should know what you’re dealing with. 
 
-<p align="center">
-  A Minecraft: Java Edition launcher for Android devices.
-</p>
+In short, DNAMobile, the "clown" behind the "DroidBridgeLauncher" project has:  
 
-<p align="center">
-  <strong>NOT AN OFFICIAL MINECRAFT PRODUCT.</strong><br>
-  <strong>NOT APPROVED AS AN OFFICIAL MINECRAFT PRODUCT, ENDORSED BY, SPONSORED BY, OR ASSOCIATED WITH MOJANG, MICROSOFT, XBOX, OR MINECRAFT.</strong>
-</p>
+- Violated open-source licenses by refusing to release the complete source code of his application while bundling code created by others. 
+- Created a launcher by piecing together AI-generated code and then acting as if it’s a serious project. 
+- Harassed people in the Minecraft launcher community, including making false accusations against multiple people.
+- Led a constant smear campaign against Mojo Launcher and its community while building a devoted audience that repeats his every word. 
+- Tried to get this fork removed, likely because it bypasses his account requirement and shows how little he actually created himself. 
 
----
+## Who is DNAMobile, really?
 
-## Important
+DNAMobile didn’t create a launcher; he generated one with an LLM. He refused to share the complete sources and spent months being a loud nuisance wherever he went. When people confronted him about violating the GPL and other licenses of the code he repackaged, he ignored them or played the victim.  
 
-DroidBridge Launcher is an independent Android project by **DNA Mobile Applications**.
+Some highlights:
 
-DroidBridge Launcher is built for users who already own Minecraft: Java Edition and want to manage and launch their own local game installation on Android. The launcher does not include Minecraft game files, Minecraft assets, paid content, account tokens, or other proprietary Mojang/Microsoft files.
+- License violations: The original BridgeLauncher uses other people’s GPL code. DNAMobile never provided the complete corresponding source, which is a direct violation. He’s been told this many times, and he simply doesn’t care. 
 
-Minecraft, Mojang, Microsoft, Xbox, and related names, services, trademarks, and assets belong to their respective owners. Users are responsible for following the Minecraft EULA, Minecraft Usage Guidelines, Microsoft Services Agreement, and any other terms that apply to their account, game copy, device, mods, resource packs, servers, or third-party content.
+- False accusations: He publicly labelled someone a pedophile without any evidence, which is both despicable and legally risky. He has never retracted this claim. 
 
-Other than any limited authentication or API access granted for Microsoft account sign-in, DroidBridge Launcher is not affiliated with, sponsored by, endorsed by, partnered with, or approved as an official Minecraft product by Mojang, Microsoft, Xbox, Minecraft, PojavLauncher, Boardwalk, Zalith Launcher, Amethyst, Fold Craft Launcher, or any other third-party launcher project.
+- MojoLauncher obsession: He has made attacking Mojo Launcher and its developers central to his identity. Anyone who questions him is labeled as a "clown" and banned.
 
-## About
+- Manipulation: He has convinced his followers that he is the victim of a conspiracy, and they defend him no matter what he does. 
 
-DroidBridge Launcher is a launcher-side Android compatibility project. It helps users manage Minecraft: Java Edition versions, instances, runtime components, renderers, controls, mods, resource packs, shader packs, worlds, logs, and launcher settings on Android.
+## Why this fork exists
 
-The project may use, modify, adapt, study, or interoperate with open-source launcher work where the applicable license allows it. DroidBridge Launcher keeps third-party license obligations attached to the code they apply to, including attribution, notice preservation, license text availability, and source availability where required.
+The original application required a Minecraft account for no real technical reason other than "being legal". This fork removes that requirement. The code is still low-quality, but at least you don't have to log in just to see it crash. 
 
-## Microsoft account sign-in
+## Get the release here:  
+https://github.com/whitebelyash/ForkCringeLauncher/releases
 
-DroidBridge Launcher may support Microsoft account sign-in through Microsoft identity services.
+## A note on the takedown attempt
 
-Microsoft account sign-in or related Minecraft service/API access may require review, registration, allow-listing, or approval from Microsoft, Mojang, or their service teams before it is available in a production build. If that access has been granted, it applies only to the authentication or API access that was reviewed and allowed.
+DNAMobile shared a screenshot suggesting that this repository was reported, probably by him.  
+It’s still active because being loud and unpleasant does not constitute a valid DMCA claim, and reports of platform abuse do not automatically remove repositories that contradict his narrative.
 
-That limited authentication/API approval does not make DroidBridge Launcher an official Minecraft product, official launcher, Mojang partner, Microsoft partner, Xbox partner, or endorsed Minecraft service.
-
-Users must use their own Microsoft/Minecraft account and are responsible for following the terms that apply to that account.
-
-## Installation and game setup
-
-DroidBridge Launcher is intended to help users install and manage their own Minecraft: Java Edition game files on their device after they have signed in or otherwise provided access allowed by the official services and terms.
-
-Code written by DNA Mobile Applications for user-facing setup, game installation guidance, account sign-in, launcher flow, or related screens is written to respect the GNU license obligations of any GNU-licensed code it partially uses, modifies, links with, or depends on. Where a file or feature is based on GPL/LGPL-covered code, DroidBridge Launcher treats the covered portions and modifications as remaining under the applicable GNU license terms.
-
-DroidBridge Launcher does not grant a Minecraft license, bypass Minecraft ownership checks, distribute Minecraft, or replace the need for a legitimate copy of Minecraft: Java Edition.
-
-## Legal pages
-
-DroidBridge Launcher provides public legal and notice pages for users and contributors:
-
-| Page | Link |
-| --- | --- |
-| Privacy Policy | https://dnamobilegaming.com/privacy |
-| Terms of Service | https://www.dnamobilegaming.com/terms |
-| Licensing Information | https://www.dnamobilegaming.com/license |
-| Open Source Notices | [OPEN_SOURCE_NOTICES.md](OPEN_SOURCE_NOTICES.md) |
-
-The in-app legal links are intended to point users to the same public privacy, terms, and licensing pages.
-
-## Source availability and license boundaries
-
-DroidBridge Launcher is a mixed-origin source tree.
-
-Files written entirely by **DNA Mobile Applications** are owned by DNA Mobile Applications unless a file header, license file, or notice says otherwise.
-
-Files copied from, modified from, derived from, or based on third-party projects remain under their original license terms. This includes any code or modifications covered by GPL, LGPL, Apache-2.0, MIT, BSD, or other open-source licenses.
-
-If this repository includes GPL/LGPL-covered code, the corresponding covered source code and DroidBridge Launcher modifications to that covered code must remain available under the applicable GNU license terms.
-
-Private production configuration, Microsoft application credentials, signing material, API keys, account-service configuration, and original DNA Mobile Applications service/client code may be excluded from the public repository when they are not copied from, modified from, linked in a way that requires publication, or derived from GPL/LGPL-covered code.
-
-Any file copied from, modified from, or derived from GPL/LGPL-covered code remains subject to the applicable GPL/LGPL terms, regardless of where it appears in the project.
-
-## Open-source libraries and licenses
-
-DroidBridge Launcher may use or reference open-source projects and libraries, including but not limited to:
-
-| Project / Library | License | Link |
-| --- | --- | --- |
-| PojavLauncher | LGPL-3.0 unless otherwise stated by the upstream project | https://github.com/PojavLauncherTeam/PojavLauncher |
-| Boardwalk | Apache-2.0 unless otherwise stated by the upstream project | https://github.com/zhuowei/Boardwalk |
-| LWJGL / LWJGL3 | BSD-3-Clause unless otherwise stated by the upstream project | https://www.lwjgl.org |
-| OpenJDK / Java runtime components | GPLv2 with the Classpath Exception for many OpenJDK components, depending on the exact runtime distribution | https://openjdk.org |
-| Mesa | MIT-style licenses depending on component/file | https://www.mesa3d.org |
-| GL4ES | MIT unless otherwise stated by the upstream project | https://github.com/ptitSeb/gl4es |
-| AndroidX / Google Material Components / Android platform libraries | Apache-2.0 unless otherwise stated | https://developer.android.com |
-
-See [OPEN_SOURCE_NOTICES.md](OPEN_SOURCE_NOTICES.md), the public licensing page, and any license files included with third-party components for the notices that apply to this repository.
-
-## Privacy
-
-DroidBridge Launcher is designed around local launcher data.
-
-Launcher settings, logs, worlds, mods, resource packs, shader packs, instances, and related files are intended to stay on the user's device unless the user chooses to export, share, upload, back up, or send them through another app or service.
-
-See the [DroidBridge Launcher Privacy Policy](https://dnamobilegaming.com/privacy) for the full privacy policy.
-
-## Language and translation support
-
-Translations are welcome.
-
-If translation files are included in this repository, contributors should keep wording clear, accurate, and respectful of the legal notices above. Avoid implying official Mojang, Microsoft, Xbox, Minecraft, or third-party launcher approval in any language.
-
-## Build instructions
-
-> This section is for developers who want to build the project locally.
-
-### Requirements
-
-- Android Studio
-- Android SDK with the project-supported minimum and target API levels
-- JDK required by the current Gradle/Android plugin setup
-- Git
-
-### Build steps
-
-```bash
-git clone https://github.com/DNAMobileApplications/DroidBridgeLauncher.git
-cd DroidBridgeLauncher
-./gradlew assembleDebug
-```
-
-On Windows:
-
-```bat
-git clone https://github.com/DNAMobileApplications/DroidBridgeLauncher.git
-cd DroidBridgeLauncher
-gradlew.bat assembleDebug
-```
-
-Release builds should be signed with your own release keystore. Do not publish builds containing private credentials, signing material, API keys, local machine paths, account tokens, or debug-only configuration.
-
-## Contributing
-
-Contributions are welcome when they respect the project's code style, legal notices, and license requirements.
-
-Do not submit copied code unless the license allows it and the original attribution is preserved. If a contribution is based on third-party code, make that clear in the pull request and keep the required notices with the affected files.
-
-## Disclaimer
-
-DroidBridge Launcher is not an official Minecraft product. Any Microsoft, Mojang, or Minecraft service/API access granted for account sign-in is limited to that reviewed authentication/API use only. It does not make DroidBridge Launcher an official launcher, official Minecraft product, endorsed service, or partner of Mojang, Microsoft, Xbox, or Minecraft.
-
-This project does not include Minecraft, does not sell Minecraft, and does not provide any rights to Minecraft or other third-party content.
-
-This README is not legal advice. Review the actual license files, third-party notices, Microsoft/Minecraft terms, Google Play policies, and any store-specific requirements before redistributing APKs, publishing modified builds, or using this project commercially.
+## Honorable mentions:
+shall be populated soon
+<figure>
+<a href="https://www.dnamobilegaming.com/terms">DroidBridgeLauncher's ToS from its real lawyer (no)</a>
+<img width="1080" height="1346" alt="DBL's ToS" src="https://github.com/user-attachments/assets/76b5bd65-202f-47ef-9e10-c440b47e29bb" />
+<figcaption><em>He didn't even bother to remove footer from the 100% real lawyer(AI)</em></figcaption>
+</figure>
