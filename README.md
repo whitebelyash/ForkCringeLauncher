@@ -63,5 +63,5 @@ https://www.youtube.com/post/UgkxL_SrmYiWtF_FYzixZjeD1WISgGItywI2
 people change but you CLEARLY did not  
 <img width="1071" height="151" alt="image-1" src="https://github.com/user-attachments/assets/8cf6215c-cb75-4f25-a8fa-2ed1eaec86ea" />
 <img width="1265" height="74" alt="image" src="https://github.com/user-attachments/assets/3cb87a1c-6693-4372-aa46-4c9bdba9a477" />
-[DroidBridgeLauncher's ToS from its real lawyer (no)][https://www.dnamobilegaming.com/terms]
+<a href="https://www.dnamobilegaming.com/terms">DroidBridgeLauncher's ToS from its real lawyer (no)</a>
 <img width="1080" height="1346" alt="IMG_20260605_225452" src="https://github.com/user-attachments/assets/76b5bd65-202f-47ef-9e10-c440b47e29bb" />
