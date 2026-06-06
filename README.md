@@ -46,6 +46,9 @@ DNAMobile shared a screenshot suggesting that this repository was reported, prob
 It’s still active because being loud and unpleasant does not constitute a valid DMCA claim, and reports of platform abuse do not automatically remove repositories that contradict his narrative.
 
 ## Honorable mentions:
+I gotta let you know, you have this on YOUR website, for the public to see
+<img width="928" height="1026" alt="IMG_20260606_182927" src="https://github.com/user-attachments/assets/2cb2cc92-155b-4ce2-bc0b-dc5993806a3c" />
+<img width="931" height="298" alt="IMG_20260606_182953" src="https://github.com/user-attachments/assets/3c9a4b71-9112-4188-bf5e-6d174ddf56c4" />
 <img width="1027" height="447" alt="image-1" src="https://github.com/user-attachments/assets/ed0ffa98-5c21-4e97-b5b2-07e85fd6dafb" />
 <img width="891" height="408" alt="image-2" src="https://github.com/user-attachments/assets/68476f2f-5010-4af1-84b5-587746af4517" />
 <img width="1080" height="1008" alt="Screenshot_20260605_191233_YouTube" src="https://github.com/user-attachments/assets/424eb746-03b3-4145-b919-bd1aca074ccd" />
@@ -81,7 +84,7 @@ It’s still active because being loud and unpleasant does not constitute a vali
 <img width="1080" height="1294" alt="Screenshot_20260524_111025_Reddit" src="https://github.com/user-attachments/assets/1a93dd1f-22e0-4167-92bb-ce463cff84e7" />
 <img width="1080" height="1168" alt="Screenshot_20260524_110630_Reddit" src="https://github.com/user-attachments/assets/4502374a-3060-412e-928c-e8e110593ace" />
 <figure>
-<a href="https://www.dnamobilegaming.com/terms">DroidBridgeLauncher's ToS from its real lawyer (no)</a>
+<a href="https://megalodon.jp/2026-0606-2323-47/https://www.dnamobilegaming.com:443/terms">DroidBridgeLauncher's ToS from its real lawyer (no)</a>
 <img width="1080" height="1346" alt="DBL's ToS" src="https://github.com/user-attachments/assets/76b5bd65-202f-47ef-9e10-c440b47e29bb" />
 <figcaption><em>He didn't even bother to remove footer from the 100% real lawyer(AI)</em></figcaption>
 </figure>
