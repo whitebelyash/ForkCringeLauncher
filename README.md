@@ -51,7 +51,8 @@ It’s still active because being loud and unpleasant does not constitute a vali
 ## Honorable mentions:
 I gotta let you know, you have this on YOUR website, for the public to see
 His privacy policy, where the original adress is: [Archive.org](https://web.archive.org/web/20260121032042/https://www.dnamobilegaming.com/policies/privacy-policy) (scroll to the bottom)  
-It is public information, not a form of Doxxing.  
+It is public information, not a form of Doxxing. Published address will be removed as soon as DNEH drops it on his website (i.e. it becomes a private information).  
+We don't want to dox anyone.  
 <img width="928" height="1026" alt="IMG_20260606_182927" src="https://github.com/user-attachments/assets/2cb2cc92-155b-4ce2-bc0b-dc5993806a3c" />
 <img width="931" height="298" alt="IMG_20260606_182953" src="https://github.com/user-attachments/assets/3c9a4b71-9112-4188-bf5e-6d174ddf56c4" />
 <img width="1027" height="447" alt="image-1" src="https://github.com/user-attachments/assets/ed0ffa98-5c21-4e97-b5b2-07e85fd6dafb" />
