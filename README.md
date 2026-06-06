@@ -40,9 +40,10 @@ The original application required a Minecraft account for no real technical reas
 ## Get the release here:  
 https://github.com/whitebelyash/ForkCringeLauncher/releases
 
-## A note on the takedown attempt
-
-DNAMobile shared a screenshot suggesting that this repository was reported, probably by him.  
+## A note on the takedown attempt and the old repo's deletion
+I should make it clear the old ForkBridge repo was not taken down via a github report, that was done by me, since i had lost interest at the time.  
+DNAMobile shared a screenshot suggesting that this repository was reported, probably by him. He has resorted to pinging everyone to report this repository in his Discord server.  
+  
 It’s still active because being loud and unpleasant does not constitute a valid DMCA claim, and reports of platform abuse do not automatically remove repositories that contradict his narrative.
 
 ## Honorable mentions:
