@@ -6,6 +6,8 @@
 [On r/SBCGaming](https://www.reddit.com/r/OdinHandheld/comments/1p50n59/dna_odin_2_portal_dual_screen/)  
 [On r/SteamDeck](https://www.reddit.com/r/SteamDeck/comments/1iokv8k/to_anyone_here_whos_ordered_a_dna_duo_for_their/)  
 [On r/OdinHandheld](https://www.reddit.com/r/OdinHandheld/comments/1hn0j2b/dna_duo/)  
+An alternative document, That's perhaps more detailed  
+[Google Docs](https://docs.google.com/document/d/1Tn9V0r3VFUSSoGU_OhCGTnm-jJG-qT4SC7jdeX_72Xk/edit?usp=sharing)
 ## ForkBridgeLauncher, an alternative without the Minecraft account requirement
 
 This fork exists because DNAMobile's actions are problematic.  
