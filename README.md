@@ -49,7 +49,7 @@ DNAMobile shared a screenshot suggesting that this repository was reported, prob
 It’s still active because being loud and unpleasant does not constitute a valid DMCA claim, and reports of platform abuse do not automatically remove repositories that contradict his narrative.
 
 ## Honorable mentions:
-I gotta let you know, you have this on YOUR website, for the public to see
+I gotta let you know, you have this on [YOUR website](https://web.archive.org/web/20260121032042/https://www.dnamobilegaming.com/policies/privacy-policy), for the public to see
 <img width="928" height="1026" alt="IMG_20260606_182927" src="https://github.com/user-attachments/assets/2cb2cc92-155b-4ce2-bc0b-dc5993806a3c" />
 <img width="931" height="298" alt="IMG_20260606_182953" src="https://github.com/user-attachments/assets/3c9a4b71-9112-4188-bf5e-6d174ddf56c4" />
 <img width="1027" height="447" alt="image-1" src="https://github.com/user-attachments/assets/ed0ffa98-5c21-4e97-b5b2-07e85fd6dafb" />
