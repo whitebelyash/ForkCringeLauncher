@@ -50,7 +50,7 @@ It’s still active because being loud and unpleasant does not constitute a vali
 
 ## Honorable mentions:
 ~~I gotta let you know, you have this on YOUR website, for the public to see
-It is public information, not a form of Doxxing. Published address will be removed as soon as DNEH drops it from his website (i.e. it becomes a private information).  ~~
+It is public information, not a form of Doxxing. Published address will be removed as soon as DNEH drops it from his website (i.e. it becomes a private information).~~
 It was removed.  
 We don't want to dox anyone. But this is what you get when you steal things from us, moron.  
 <img width="928" height="1026" alt="IMG_20260606_182927" src="https://github.com/user-attachments/assets/2cb2cc92-155b-4ce2-bc0b-dc5993806a3c" />
