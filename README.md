@@ -1,3 +1,6 @@
+> [!NOTE]
+> There will be no releases anymore. With DroidBridge's enlisting on Google Play, It's time to cut the patches so the kids glazing him disappear. So please dont ask for patches / updates in issues. 🙏
+
 # Before anything, LOOK AT DNAMobile's PAST
 ### (switch to desktop mode if blurry/muddy)
 ## [Old ES-DE drama](https://docs.google.com/document/d/1MpblBzFEjJZDVkVChou8sdy7MuB2V_bck6MXDAGt4a0/edit?tab=t.0)  
